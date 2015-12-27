@@ -56,17 +56,27 @@ override func viewDidLoad() {
     @IBAction func findMyLocationOnTheMap(sender: AnyObject){
         
         if  textFieldForLocation.text!.isEmpty{
-            let alert = UIAlertController(title: "Error", message: "There isn't anything in the textfield to search for", preferredStyle: .Alert)
-            alert.addAction(UIAlertAction(title: "Dismiss", style: .Default, handler: nil))
-            self.presentViewController(alert, animated: true, completion: nil)
+            self.alertOnFailure("Error", message: "There isn't anything in the textfield to search for")
         } else{
             activityView.alpha = 1.0
             activityView.startAnimating()
+            
+            //self.findmeOnMapGeoCoded()
+            
+            
             mapSearchRequest = MKLocalSearchRequest()
             mapSearchRequest.naturalLanguageQuery = textFieldForLocation.text
             mapSearch = MKLocalSearch(request: mapSearchRequest!)
-            mapSearch.startWithCompletionHandler{(localSearchResponse, error) -> Void in
-                self.findmeOnMap(self.mapSearchResponse.boundingRegion.center.latitude, longitude: self.mapSearchResponse.boundingRegion.center.longitude)
+            mapSearch.startWithCompletionHandler{(mapSearchResponse, error) -> Void in
+                self.pointAnnotation = MKPointAnnotation()
+                self.latit = mapSearchResponse!.boundingRegion.center.latitude
+                self.longit = mapSearchResponse!.boundingRegion.center.longitude
+                self.pointAnnotation.coordinate = CLLocationCoordinate2D(latitude: mapSearchResponse!.boundingRegion.center.latitude, longitude: mapSearchResponse!.boundingRegion.center.longitude)
+                self.pointAnnotation.title = self.fullName
+                self.pointAnnotation.subtitle = self.mediaURL2Attach.text
+                self.pinPointAnnotation = MKPinAnnotationView(annotation: self.pointAnnotation, reuseIdentifier: nil)
+                self.mapView.centerCoordinate = self.pointAnnotation.coordinate
+                self.mapView.addAnnotation(self.pinPointAnnotation.annotation!)
             }
             self.presentSecondView()
         }
@@ -74,7 +84,8 @@ override func viewDidLoad() {
     
     
     // MARK: find my location from gps
-//    @IBAction func grabMyCurrentPositionIntoAPin(sender: AnyObject){
+    @IBAction func grabMyCurrentPositionIntoAPin(sender: AnyObject){
+        self.alertOnFailure("Sorry", message: "We are working on implmenting this feature soon")
 //        /* Track if the user authorized the app to access his location */
 //        myLocationGrabbed = CLLocationManager()
 //
@@ -97,7 +108,7 @@ override func viewDidLoad() {
 //        
 //
 //        self.presentSecondView()
-//    }
+    }
     
 
     
@@ -121,18 +132,34 @@ override func viewDidLoad() {
     }
     
     // MARK: find me on the map
-    func findmeOnMap(latitude: CLLocationDegrees, longitude: CLLocationDegrees){
-        self.pointAnnotation = MKPointAnnotation()
-        self.pointAnnotation.coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-        self.pointAnnotation.title = fullName
-        if mediaURL2AttachValidation(mediaURL2Attach.text!){
-            self.pointAnnotation.subtitle = mediaURL2Attach.text
-        }
-        self.pinPointAnnotation = MKPinAnnotationView(annotation: self.pointAnnotation, reuseIdentifier: nil)
-        self.mapView.centerCoordinate = self.pointAnnotation.coordinate
-        self.mapView.addAnnotation(self.pinPointAnnotation.annotation!)
-    }
+//    func findmeOnMap(latitude: CLLocationDegrees, longitude: CLLocationDegrees){
+//        self.pointAnnotation = MKPointAnnotation()
+//        self.pointAnnotation.coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+//        self.pointAnnotation.title = fullName
+//        if mediaURL2AttachValidation(mediaURL2Attach.text!){
+//            self.pointAnnotation.subtitle = mediaURL2Attach.text
+//        }
+//        self.pinPointAnnotation = MKPinAnnotationView(annotation: self.pointAnnotation, reuseIdentifier: nil)
+//        self.mapView.centerCoordinate = self.pointAnnotation.coordinate
+//        self.mapView.addAnnotation(self.pinPointAnnotation.annotation!)
+//    }
     
+    func findmeOnMapGeoCoded(){
+        let gCoder = CLGeocoder()
+        
+        gCoder.geocodeAddressString(textFieldForLocation.text!){(placemark, error) in
+            
+            if let placemark = placemark![0] as? CLPlacemark {
+                let placemark: CLPlacemark = placemark
+                let coordinates: CLLocationCoordinate2D = placemark.location!.coordinate
+                let pointAnnotation: MKPointAnnotation = MKPointAnnotation()
+                pointAnnotation.coordinate = coordinates
+                pointAnnotation.title = self.fullName
+                self.mapView?.centerCoordinate = coordinates
+                self.mapView.addAnnotation(pointAnnotation)
+            }
+        }
+    }
     /* Helper: transition within the same view*/
     func presentSecondView(){
         firstLabel.hidden = true

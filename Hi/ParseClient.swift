@@ -118,7 +118,6 @@ class ParseClient: NSObject {
             
             if let object = parsedResult["objectId"] as? String {
                 self.objectID = object
-                StudentLocations.getLocations(parsedResult as! [[String : AnyObject]])
                 completionHandler(success: true, errorString: nil)
             }else{
                 completionHandler(success: false, errorString: "Failed")
