@@ -11,75 +11,32 @@ import UIKit
 
 class ParseClient: NSObject {
     
-    
     var session: NSURLSession
+    var objectID: String!
     
     override init(){
         session = NSURLSession.sharedSession()
         super.init()
     }
     
+    var map = [StudentLocations]()
     
-    // MARK: GET
-    func getMethodImplementation(completionHandler: (result: AnyObject!, error: NSError?) -> Void) -> NSURLSessionDataTask {
+    func callParseAPI(completionHandler: (success: Bool, errorString: ErrorType?) -> Void){
         
-        let urlString = Constants.secureParseURL
+        /* 1. Set the parameters */
+        
+        //*& 2. Build the URL */
+        let urlString = "https://api.parse.com/1/classes/StudentLocation"
         let url = NSURL(string: urlString)!
+        
+        /* 3. Configure the request */
         let request = NSMutableURLRequest(URL: url)
-        request.addValue("\(Constants.ApiKey)", forHTTPHeaderField: "X-Parse-Application-Id")
-        request.addValue("\(Constants.APiKeyParse)", forHTTPHeaderField: "X-Parse-REST-API-Key")
         
-        let task = session.dataTaskWithRequest(request) { (data, response, error) in
-            guard (error == nil) else {
-                print("There was an error: \(error)")
-                return
-            }
+        /* Add  App Id and REST API Id */
+        request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
+        request.addValue("QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY", forHTTPHeaderField: "X-Parse-REST-API-Key")
+        let task = session.dataTaskWithRequest(request) { data, response, error in
             
-            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
-                if let response = response as? NSHTTPURLResponse {
-                    print("Your request returned an invalid response! Status code: \(response.statusCode)!")
-                } else if let response = response {
-                    print("Your request returned an invalid response! Response: \(response)!")
-                }else{
-                    print("Your request returned an invalid response!")
-                }
-                return
-            }
-            
-            guard let data = data else {
-                print("The request returned no data")
-                return
-            }
-            
-            ParseClient.parseJSONWithCompletionHandler(data, completionHandler: completionHandler)
-        }
-        task.resume()
-        return task
-        
-    }
-    
-    
-    // MARK: POST
-    
-    func postMethodImplementation(method: String, jsonBody: [String:AnyObject], completionHandler: (result: AnyObject!, error: NSError?) -> Void) -> NSURLSessionDataTask {
-        
-        
-        /* 2/3. Build the URL and configure the request */
-        let urlString = Constants.secureParseURL
-        let url = NSURL(string: urlString)!
-        let request = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.addValue("application/json", forHTTPHeaderField: "Accept")
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        do {
-            request.HTTPBody = try! NSJSONSerialization.dataWithJSONObject(jsonBody, options: .PrettyPrinted)
-        }
-        
-        /* 4. Make the request */
-        let task = session.dataTaskWithRequest(request) { (data, response, error) in
-            
-            /* GUARD: Was there an error? */
             guard (error == nil) else {
                 print("There was an error with your request: \(error)")
                 return
@@ -97,79 +54,80 @@ class ParseClient: NSObject {
                 return
             }
             
-            /* GUARD: Was there any data returned? */
-            guard let data = data else {
-                print("No data was returned by the request!")
-                return
-            }
-            
-            /* 5/6. Parse the data and use the data (happens in completion handler) */
-            ParseClient.parseJSONWithCompletionHandler(data, completionHandler: completionHandler)
-        }
-        
-        /* 7. Start the request */
-        task.resume()
-        
-        return task
-    }
-    
-    // MARK: PUT
-    func putMethodImplementation(method: String, jsonBody: [String:AnyObject], completionHandler: (result: AnyObject!, error: NSError?) -> Void) -> NSURLSessionDataTask {
-        let urlString = Constants.secureParseURL + "/" + Methods.ObjectID
-        let url = NSURL(string: urlString)
-        let request = NSMutableURLRequest(URL: url!)
-        request.HTTPMethod = "PUT"
-        request.addValue("\(Constants.ApiKey)", forHTTPHeaderField: "X-Parse-Application-Id")
-        request.addValue("\(Constants.APiKeyParse)", forHTTPHeaderField: "X-Parse-REST-API-Key")
-        
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        do {
-            request.HTTPBody = try! NSJSONSerialization.dataWithJSONObject(jsonBody, options: .PrettyPrinted)
-        }
-        
-        let task = session.dataTaskWithRequest(request) { data, response, error in
-            guard (error != nil) else {
-                print("We find an error with the request")
-                return
-            }
-            
-            /* GUARD: Did we get a successful 2XX response? */
-            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
-                if let response = response as? NSHTTPURLResponse {
-                    print("Your request returned an invalid response! Status code: \(response.statusCode)!")
-                } else if let response = response {
-                    print("Your request returned an invalid response! Response: \(response)!")
-                } else {
-                    print("Your request returned an invalid response!")
-                }
-                return
-            }
-            
             guard let data = data else {
                 print("The request returned no data")
                 return
             }
-            ParseClient.parseJSONWithCompletionHandler(data, completionHandler: completionHandler)
+            
+            var parsedResult: AnyObject!
+            do{
+                parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)
+            } catch{
+                _ = [NSLocalizedDescriptionKey : "Could not parse the JSON: '\(data)'"]
+                completionHandler(success: false, errorString: error)
+            }
+            
+
+            
+            if let results = parsedResult["results"] as? [[String : AnyObject]] {
+                //Clear existing data from the mapPoints object.
+                self.map.removeAll(keepCapacity: true)
+                //StudentLocations.getLocations(results)
+                //Re-populate the mapPoints object with refreshed data.
+                for result in results {
+                    self.map.append(StudentLocations(dictionary: result))
+                }
+                completionHandler(success: true, errorString: nil)
+            } else {
+                completionHandler(success: false, errorString: error)
+            }
+            
         }
         task.resume()
-        return task
     }
-
     
-    // Helper function: given Raw JSON, return a usable foundation object
+    // MARK: Function for post
+    func postDataToParse(latitude: String, longitude: String, mapString: String, mediaURL: String, completionHandler: (success: Bool, errorString: String?) -> Void){
     
-    class func parseJSONWithCompletionHandler(data: NSData, completionHandler: (result: AnyObject!, error: NSError?) -> Void){
+        let urlString = "https://api.parse.com/1/classes/StudentLocation"
+        let url = NSURL(string: urlString)!
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "POST"
+        request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
+        request.addValue("QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY", forHTTPHeaderField: "X-Parse-REST-API-Key")
+        request.addValue("aplication/json", forHTTPHeaderField: "Content-Type")
         
-        var parsedResult: AnyObject!
-        do{
-            parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)
-        } catch{
-            let failed = [NSLocalizedDescriptionKey : "Could not parse the JSON: '\(data)'"]
-            completionHandler(result: nil, error: NSError(domain: "parseJSONWithCompletionHandler", code: 1, userInfo: failed))
+        request.HTTPBody = "{\"uniqueKey\": \"\(UdacityClient.sharedInstance().userKey)\", \"firstName\": \"\(UdacityClient.sharedInstance().firstName)\", \"lastName\": \"\(UdacityClient.sharedInstance().lastName)\",\"mapString\": \"\(mapString)\", \"mediaURL\": \"\(mediaURL)\",\"latitude\": \(latitude), \"longitude\": \(longitude)}".dataUsingEncoding(NSUTF8StringEncoding)
+        let task = session.dataTaskWithRequest(request) {data, response, error in
+            guard (error == error) else {
+                completionHandler(success: false, errorString: nil)
+                return
+            }
+            
+            guard let data = data else {
+                print("Something went wrong")
+                return
+            }
+            var parsedResult: AnyObject!
+            do{
+                parsedResult = try NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments)
+            }catch{
+                parsedResult = nil
+                return
+            }
+            
+            if let object = parsedResult["objectId"] as? String {
+                self.objectID = object
+                StudentLocations.getLocations(parsedResult as! [[String : AnyObject]])
+                completionHandler(success: true, errorString: nil)
+            }else{
+                completionHandler(success: false, errorString: "Failed")
+            }
+            
         }
-        completionHandler(result: parsedResult, error: nil)
+        task.resume()
     }
+    
     
     // MARK: Shared instance
     

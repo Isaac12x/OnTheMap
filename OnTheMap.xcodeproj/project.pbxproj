@@ -21,7 +21,6 @@
 		EC902ABC1C2F07F0008077CD /* ParseConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC902ABB1C2F07F0008077CD /* ParseConvenience.swift */; };
 		EC902ABE1C2F07FA008077CD /* ParseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC902ABD1C2F07FA008077CD /* ParseClient.swift */; };
 		EC902AC21C2F24CC008077CD /* PostPinViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC902AC11C2F24CC008077CD /* PostPinViewController.swift */; };
-		EC902AC41C2F2525008077CD /* PostPinLastStepVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC902AC31C2F2525008077CD /* PostPinLastStepVC.swift */; };
 		ECF0BA231C20462600A2675F /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECF0BA221C20462600A2675F /* MapViewController.swift */; };
 		ECF0BA251C2331DF00A2675F /* DataTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECF0BA241C2331DF00A2675F /* DataTableView.swift */; };
 		ECF0BA271C233D9700A2675F /* TableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECF0BA261C233D9700A2675F /* TableViewCell.swift */; };
@@ -67,7 +66,6 @@
 		EC902ABB1C2F07F0008077CD /* ParseConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParseConvenience.swift; sourceTree = "<group>"; };
 		EC902ABD1C2F07FA008077CD /* ParseClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParseClient.swift; sourceTree = "<group>"; };
 		EC902AC11C2F24CC008077CD /* PostPinViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPinViewController.swift; sourceTree = "<group>"; };
-		EC902AC31C2F2525008077CD /* PostPinLastStepVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPinLastStepVC.swift; sourceTree = "<group>"; };
 		ECF0BA221C20462600A2675F /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		ECF0BA241C2331DF00A2675F /* DataTableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DataTableView.swift; path = ../DataTableView.swift; sourceTree = "<group>"; };
 		ECF0BA261C233D9700A2675F /* TableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TableViewCell.swift; path = ../TableViewCell.swift; sourceTree = "<group>"; };
@@ -120,6 +118,7 @@
 		EC902AA81C2EBF0D008077CD /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				EC902A9D1C2B3850008077CD /* StudentLocations.swift */,
 				EC902AA71C2EBEFD008077CD /* Client */,
 			);
 			name = Model;
@@ -140,7 +139,6 @@
 				ECF0BA221C20462600A2675F /* MapViewController.swift */,
 				ECF0BA241C2331DF00A2675F /* DataTableView.swift */,
 				EC902AC11C2F24CC008077CD /* PostPinViewController.swift */,
-				EC902AC31C2F2525008077CD /* PostPinLastStepVC.swift */,
 				ECF0BA261C233D9700A2675F /* TableViewCell.swift */,
 			);
 			name = Controller;
@@ -193,15 +191,22 @@
 				EC902AB91C2F07E8008077CD /* ParseConstants.swift */,
 				EC902ABB1C2F07F0008077CD /* ParseConvenience.swift */,
 				EC902ABD1C2F07FA008077CD /* ParseClient.swift */,
-				EC902A9D1C2B3850008077CD /* StudentLocations.swift */,
 			);
 			name = Parse;
+			sourceTree = "<group>";
+		};
+		EC902B1F1C3002E5008077CD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				EC902A9F1C2C1F29008077CD /* MapKit.framework */,
+			);
+			name = Frameworks;
+			path = ..;
 			sourceTree = "<group>";
 		};
 		ECFD240B1C1B5BD0005624BE = {
 			isa = PBXGroup;
 			children = (
-				EC902A9F1C2C1F29008077CD /* MapKit.framework */,
 				ECFD24161C1B5BD0005624BE /* OnTheMap */,
 				ECFD24151C1B5BD0005624BE /* Products */,
 			);
@@ -228,6 +233,7 @@
 				ECFD24201C1B5BD1005624BE /* LaunchScreen.storyboard */,
 				EC902AAC1C2EBF34008077CD /* Assets */,
 				EC902AAD1C2EBF52008077CD /* Supporting Files */,
+				EC902B1F1C3002E5008077CD /* Frameworks */,
 			);
 			name = OnTheMap;
 			path = Hi;
@@ -380,7 +386,6 @@
 				EC902ABC1C2F07F0008077CD /* ParseConvenience.swift in Sources */,
 				EC902AC21C2F24CC008077CD /* PostPinViewController.swift in Sources */,
 				ECF0BA271C233D9700A2675F /* TableViewCell.swift in Sources */,
-				EC902AC41C2F2525008077CD /* PostPinLastStepVC.swift in Sources */,
 				EC902ABA1C2F07E8008077CD /* ParseConstants.swift in Sources */,
 				ECF0BA231C20462600A2675F /* MapViewController.swift in Sources */,
 				EC902AB81C2EC575008077CD /* UdacityConvenience.swift in Sources */,

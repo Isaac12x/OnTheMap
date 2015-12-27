@@ -9,14 +9,13 @@
 import UIKit
 import MapKit
 
-class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate{
-    
-    // TODO: Make the long gesture work
-    //       Make a hint pop up to explain how to log out!
+class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
 
         @IBOutlet weak var mapView: MKMapView!
         @IBOutlet weak var postPinButton: UIBarButtonItem!
         @IBOutlet weak var refreshButton: UIBarButtonItem!
+        @IBOutlet weak var activityView: UIActivityIndicatorView!
+    
     
     var longPress: UILongPressGestureRecognizer? = nil
     var session: NSURLSession!
@@ -27,30 +26,23 @@ override func viewDidLoad(){
     
     session = NSURLSession.sharedSession()
     self.initLongPress()
+    self.activityView.alpha = 0.0
     
     //MARK: Set up the Map
     
-    var mapAnnotations = [MKPointAnnotation]()
-    
-    for dictionary in locations{
-        let lat = CLLocationDegrees(dictionary["latitude"] as! Double)
-        let long = CLLocationDegrees(dictionary["longitude"] as! Double)
-        
-        let cordinates = CLLocationCoordinate2D(latitude: lat, longitude: long)
-        let first = dictionary["firstName"] as! String
-        let last = dictionary["lastName"] as! String
-        let postedURL = dictionary["mediaURL"] as! String
-        
+    for dictionary in ParseClient.sharedInstance().map{
         let pinPoint = MKPointAnnotation()
-        pinPoint.coordinate = cordinates
-        pinPoint.title = "\(first) \(last)"
-        pinPoint.subtitle = postedURL
-        
-        mapAnnotations.append(pinPoint)
+        let location = CLLocationCoordinate2D(latitude: dictionary.latitude, longitude: dictionary.longitude)
+        pinPoint.coordinate = location
+        pinPoint.title = "\(dictionary.fullName)"
+        pinPoint.subtitle = dictionary.mediaURL
+        mapView.addAnnotation(pinPoint)
     }
-    self.mapView.addAnnotations(mapAnnotations)
+
 }
     
+    
+    // MARK: MapViewDelegate
     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
         let reuseId = "pin"
         var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView!
@@ -82,18 +74,33 @@ override func viewDidLoad(){
     }
     
     @IBAction func refreshData(sender: AnyObject){
-        ParseClient.sharedInstance().refreshDataFromParse()
+        self.refreshDataFromParse()
     }
     
+
     
-    // MARK: Logout methods
     
-    func completeLogout(){
-        dispatch_async(dispatch_get_main_queue()){
-            let logOutController = self.storyboard!.instantiateViewControllerWithIdentifier("ViewController")
-            self.presentViewController(logOutController, animated: false, completion: nil)
+    /* Helper: refresh data */
+    func refreshDataFromParse(){
+        activityView.alpha = 1.0
+        activityView.startAnimating()
+        
+        let parseClient = ParseClient.sharedInstance()
+        parseClient.callParseAPI(){ (success, error) in
+            if success{
+                //Do nothing
+            }else{
+                let alert = UIAlertController(title: "Failed", message: "Failed to reload data", preferredStyle: .Alert)
+                alert.addAction(UIAlertAction(title: "Dismiss", style: .Default, handler: nil))
+                self.presentViewController(alert, animated: true, completion: nil)
+            }
         }
+            
+        activityView.stopAnimating()
+        activityView.alpha = 0.0
     }
+    
+    
 
 
 }
@@ -117,17 +124,23 @@ extension MapViewController {
     
     func handleLongPress(recognizer: UILongPressGestureRecognizer){
             let logoutModal = UIAlertController(title: "Logout from Udacity", message: nil, preferredStyle: .ActionSheet)
-        
-//            let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel){(action) in
-//                self.dismissViewControllerAnimated(true, completion: nil)
-//            }
-//            logoutModal.addAction(cancelAction)
-        
         let logoutAction = UIAlertAction(title: "Logout", style: .Destructive){(action: UIAlertAction!) in
-                self.dismissViewControllerAnimated(true, completion: nil)
+            UdacityClient.sharedInstance().deleteMethodImplementation(){(success, error) in
+                if success{
+                    let logOutController = self.storyboard!.instantiateViewControllerWithIdentifier("LoginViewController")
+                    self.presentViewController(logOutController, animated: false, completion: nil)
+                } else{
+                    let alert = UIAlertController(title: "Bad luck", message: "You weren't logged out", preferredStyle: .Alert)
+                    alert.addAction(UIAlertAction(title: "Dimiss", style: .Default, handler: nil))
+                    self.presentViewController(alert, animated: true, completion: nil)
+                }
             }
-            logoutModal.addAction(logoutAction)
+            
+        }
+        logoutModal.addAction(logoutAction)
         
+        let cancelAction = UIAlertAction(title: "Cancel", style: .Default, handler: nil)
+        logoutModal.addAction(cancelAction)
         
         self.presentViewController(logoutModal, animated: true, completion: nil)
         

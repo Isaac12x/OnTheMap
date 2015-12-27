@@ -10,12 +10,9 @@
 extension UdacityClient {
     
     struct Constants {
-    
-        
         var sessionID: String? = nil
         var userID: String? = nil
-
-                
+  
         // MARK: URLs
         static let secureUdacityURL : String = "https://www.udacity.com/api/"
         
@@ -33,17 +30,22 @@ extension UdacityClient {
         static let ObjectId = "objectId"
     }
     
-    struct Parameters {
-        static let email = "email"
-        static let password = "password"
+    struct JSONBodyKeys {
+        static let Udacity = "udacity"
+        static var Username = "username"
+        static var Password = "password"
     }
     
     // MARK: JSONResponse Keys
     struct JSONResponses {
         
         // MARK: Account
-        static let UserID = "key"
-        static let SessionID = "id"
+        static let Account = "account"
+        static let UserKey = "key"
+        static let Session = "session"
+        static let User = "user"
+        static let FirstName = "first_name"
+        static let LastName = "last_name"
     }
     
 }

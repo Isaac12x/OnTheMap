@@ -8,29 +8,26 @@
 
 extension ParseClient{
 
-
-    struct Constants {
-        
-        // MARK: URL
+    // MARK: URL
+    struct URL {
         static let secureParseURL : String = "https://api.parse.com/1/classes/StudentLocation"
-
-        
-        // MARK: API Key
-        static let ApiKey : String = "QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr"
-        static let APiKeyParse : String = "QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY"
     }
-    
     
     // MARK: Methods
     struct Methods{
         static let ObjectID = "objectId"
     }
     
+    struct HeaderValues {
+        static let ApiKey = "QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr"
+        static let APiKeyParse = "QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY"
+        static let JSON = "application/json"
+    }
     
     // MARK: JSON Body
 
     struct JSONBodyKeys {
-        static let UniqueKey = "key"
+        static let UniqueKey = "uniqueKey"
         static let FirstName = "firstName"
         static let LastName = "lastName"
         static let MediaURL = "mediaURL"
@@ -40,14 +37,14 @@ extension ParseClient{
     }
     
     // MARK: JSON Responses
-    struct JSONResponses {
+    struct JSONResponseKeys {
         
         // MARK: General
         static let StatusMessage = "status_message"
         static let StatusCode = "status_code"
         
-        // MARK: Repsonse
-        static let LocationResponse = "locationsResponse"
+        // MARK: Response
+        static let Results = "results"
         
         // MARK: location
         static let CreatedAt = "createdAt"
@@ -61,4 +58,6 @@ extension ParseClient{
         static let UniqueKey = "uniqueKey"
         static let UpdatedAt = "updatedAt"
     }
+
+
 }

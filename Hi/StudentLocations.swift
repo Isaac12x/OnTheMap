@@ -8,30 +8,29 @@
 
 struct StudentLocations {
     
-    // MARK: Properties
-    
-    var latitude = 0.0
-    var longitude = 0.0
-    var mapString = ""
-    var firstName = ""
-    var lastName = ""
-    var mediaURL = ""
-    var objectID = ""
-    var uniqueKey = ""
-    
     // MARK: Initializers
+    let uniqueKey: String
+    let firstName: String
+    let lastName: String
+    var mediaURL: String
+    var fullName: String!
+    var longitude: Double!
+    var latitude: Double!
+    var mapString: String!
+    var objectID: String!
     
     /* Construct a UdacityPin from a dictionary */
     init(dictionary: [String : AnyObject]) {
         
-        firstName = dictionary[ParseClient.JSONResponses.FirstName] as! String
-        lastName = dictionary[ParseClient.JSONResponses.LastName] as! String
-        latitude = dictionary[ParseClient.JSONResponses.Latitude] as! Double
-        longitude = dictionary[ParseClient.JSONResponses.Longitude] as! Double
-        mapString = dictionary[ParseClient.JSONResponses.MapString] as! String
-        mediaURL = dictionary[ParseClient.JSONResponses.MediaURL] as! String
-        uniqueKey = dictionary[ParseClient.JSONResponses.UniqueKey] as! String
-        objectID = dictionary[ParseClient.JSONResponses.ObjectID] as! String
+        firstName = dictionary[ParseClient.JSONResponseKeys.FirstName] as! String
+        lastName = dictionary[ParseClient.JSONResponseKeys.LastName] as! String
+        mediaURL = dictionary[ParseClient.JSONResponseKeys.MediaURL] as! String
+        uniqueKey = dictionary[ParseClient.JSONResponseKeys.UniqueKey] as! String        
+        latitude = dictionary[ParseClient.JSONResponseKeys.Latitude] as! Double
+        longitude = dictionary[ParseClient.JSONResponseKeys.Longitude] as! Double
+        mapString = dictionary[ParseClient.JSONResponseKeys.MapString] as! String
+        objectID = dictionary[ParseClient.JSONResponseKeys.ObjectID] as! String
+        fullName = "\(firstName) \(lastName)"
         
     }
     
