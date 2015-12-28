@@ -33,8 +33,8 @@ class ParseClient: NSObject {
         let request = NSMutableURLRequest(URL: url)
         
         /* Add  App Id and REST API Id */
-        request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
-        request.addValue("QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY", forHTTPHeaderField: "X-Parse-REST-API-Key")
+        request.addValue("\(HeaderValues.ApiKey)", forHTTPHeaderField: "X-Parse-Application-Id")
+        request.addValue("\(HeaderValues.APiKeyParse)", forHTTPHeaderField: "X-Parse-REST-API-Key")
         let task = session.dataTaskWithRequest(request) { data, response, error in
             
             guard (error == nil) else {
@@ -45,11 +45,12 @@ class ParseClient: NSObject {
             /* GUARD: Did we get a successful 2XX response? */
             guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
                 if let response = response as? NSHTTPURLResponse {
-                    print("Your request returned an invalid response! Status code: \(response.statusCode)!")
+                    completionHandler(success: false, errorString: error)
                 } else if let response = response {
-                    print("Your request returned an invalid response! Response: \(response)!")
+                    completionHandler(success: false, errorString: error)
                 } else {
-                    print("Your request returned an invalid response!")
+                    completionHandler(success: false, errorString: error)
+
                 }
                 return
             }

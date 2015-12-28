@@ -24,6 +24,8 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     var parseClient = ParseClient.sharedInstance()
     var session: NSURLSession!
     var tapRecognizer: UITapGestureRecognizer? = nil
+    var keyboardAdjusted = false
+    var lastKeyboardOffset : CGFloat = 0.0
     
     // MARK: Load textfield image
 
@@ -62,6 +64,7 @@ override func viewDidLoad() {
 override func viewWillAppear(animated: Bool) {
     super.viewWillAppear(animated)
     self.addKeyboardDismissRecognizer()
+    self.subscribeToKeyboardNotifications()
 }
 
 override func viewDidAppear(animated: Bool) {
@@ -74,6 +77,7 @@ override func viewDidAppear(animated: Bool) {
 override func viewWillDisappear(animated: Bool) {
     super.viewWillDisappear(animated)
     self.removeKeyboardDismissRecognizer()
+    self.unsubscribeFromKeyboardNotifications()
     self.renableUI()
 }
 
@@ -129,8 +133,11 @@ override func viewWillDisappear(animated: Bool) {
                         }
                     }else{
                         self.alertOnFailure("Failed", message: "Wrong username/password combination")
-                        self.displayError(error)
-                        self.renableUI()
+
+                        dispatch_async(dispatch_get_main_queue()){
+                            self.displayError(error)
+                            self.renableUI()
+                        }
                     }
                 }
             }
@@ -210,7 +217,9 @@ extension LoginViewController {
     }
 }
 
+//MARK: Slide view up/down when keyboard
 extension LoginViewController {
+    
     func addKeyboardDismissRecognizer() {
         self.view.addGestureRecognizer(tapRecognizer!)
     }
@@ -222,7 +231,40 @@ extension LoginViewController {
     func handleSingleTap(recognizer: UITapGestureRecognizer) {
         self.view.endEditing(true)
     }
+    
+    func subscribeToKeyboardNotifications() {
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillShow:", name: UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillHide:", name: UIKeyboardWillHideNotification, object: nil)
+    }
+    
+    func unsubscribeFromKeyboardNotifications() {
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillShowNotification, object: nil)
+    }
+    
+    func keyboardWillShow(notification: NSNotification) {
+        
+        if keyboardAdjusted == false {
+            lastKeyboardOffset = getKeyboardHeight(notification) / 2
+            self.view.superview?.frame.origin.y -= lastKeyboardOffset
+            keyboardAdjusted = true
+        }
+    }
+    
+    func keyboardWillHide(notification: NSNotification) {
+        
+        if keyboardAdjusted == true {
+            self.view.superview?.frame.origin.y += lastKeyboardOffset
+            keyboardAdjusted = false
+        }
+    }
+    
+    func getKeyboardHeight(notification: NSNotification) -> CGFloat {
+        let userInfo = notification.userInfo
+        let keyboardSize = userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue // of CGRect
+        return keyboardSize.CGRectValue().height
+}
 
 }
+
 
 

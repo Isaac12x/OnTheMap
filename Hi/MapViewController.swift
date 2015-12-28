@@ -25,6 +25,7 @@ override func viewDidLoad(){
     super.viewDidLoad()
     
     session = NSURLSession.sharedSession()
+    mapView.delegate = self
     self.initLongPress()
     self.activityView.alpha = 0.0
     
@@ -45,14 +46,14 @@ override func viewDidLoad(){
     // MARK: MapViewDelegate
     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
         let reuseId = "pin"
-        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView!
+        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
         
         if pinView == nil{
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
             pinView!.canShowCallout = true
             pinView!.pinTintColor = UIColor.redColor()
             pinView!.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
-        } else {
+        }else {
             pinView!.annotation = annotation
         }
         return pinView

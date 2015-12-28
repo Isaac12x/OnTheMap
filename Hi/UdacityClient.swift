@@ -103,7 +103,7 @@ class UdacityClient: NSObject{
             }
             
             
-            if let userKey = parsedResult["account"]!!.valueForKey("key") as? String {
+            if let userKey = parsedResult["account"]??.valueForKey("key") as? String {
                 self.userKey = userKey
                 completionHandler(success: true, errorString: nil)
             } else {
@@ -140,12 +140,11 @@ class UdacityClient: NSObject{
             /* GUARD: Did we get a successful 2XX response? */
             guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
                 if let response = response as? NSHTTPURLResponse {
-                    print("Your request returned an invalid response! Status code: \(response.statusCode)!")
+                    completionHandler(success: false, errorString: error?.localizedDescription)
                 }else if let response = response {
-                    print("Your request returned an invalid response! Response: \(response)!")
-                    
+                    completionHandler(success: false, errorString: error?.localizedDescription)
                 } else {
-                    print("Your request returned an invalid response!")
+                    completionHandler(success: false, errorString: error?.localizedDescription)
                 }
                 return
             }
