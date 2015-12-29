@@ -15,22 +15,22 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         @IBOutlet weak var postPinButton: UIBarButtonItem!
         @IBOutlet weak var refreshButton: UIBarButtonItem!
         @IBOutlet weak var activityView: UIActivityIndicatorView!
+        @IBOutlet weak var logOutButton: UIBarButtonItem!
     
-    
-    var longPress: UILongPressGestureRecognizer? = nil
     var session: NSURLSession!
-    var locations: [StudentLocations] = [StudentLocations]()
+    var locations = ParseClient.sharedInstance().map
+    var students = StudentLocations?.self
     
 override func viewDidLoad(){
     super.viewDidLoad()
     
     session = NSURLSession.sharedSession()
-    self.initLongPress()
+    mapView.delegate = self
     self.activityView.alpha = 0.0
     
     //MARK: Set up the Map
     
-    for dictionary in ParseClient.sharedInstance().map{
+    for dictionary in locations{
         let pinPoint = MKPointAnnotation()
         let location = CLLocationCoordinate2D(latitude: dictionary.latitude, longitude: dictionary.longitude)
         pinPoint.coordinate = location
@@ -45,7 +45,7 @@ override func viewDidLoad(){
     // MARK: MapViewDelegate
     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
         let reuseId = "pin"
-        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView!
+        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
         
         if pinView == nil{
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
@@ -73,10 +73,22 @@ override func viewDidLoad(){
         self.presentViewController(controller, animated: true, completion: nil)
     }
     
+    // MARK: RefreshData
     @IBAction func refreshData(sender: AnyObject){
         self.refreshDataFromParse()
     }
     
+    // MARK: Log Out from Udacity, return to loginViewController
+    @IBAction func logOutFromUdacity(sender: AnyObject){
+        UdacityClient.sharedInstance().deleteMethodImplementation(){(success, error) in
+            if success{
+                let logOutController = self.storyboard!.instantiateViewControllerWithIdentifier("LoginVC") as! LoginViewController
+                self.presentViewController(logOutController, animated: false, completion: nil)
+            }else{
+                self.alertOnFailure("Failure", message: "Unable to complete logout")
+            }
+        }
+    }
 
     
     
@@ -100,50 +112,21 @@ override func viewDidLoad(){
         activityView.alpha = 0.0
     }
     
-    
-
-
-}
-
-extension MapViewController {
-    func initLongPress(){
-        longPress = UILongPressGestureRecognizer(target: self, action: "handleLongPress:")
-        longPress?.numberOfTapsRequired = 0
-        longPress?.numberOfTouchesRequired = 1
-        longPress?.minimumPressDuration = 1.0
-        longPress?.allowableMovement = 0
-        longPress?.delaysTouchesBegan = false
-        longPress?.delegate = self
-        self.view.addGestureRecognizer(longPress!)
-    }
-    
-}
-
-
-extension MapViewController {
-    
-    func handleLongPress(recognizer: UILongPressGestureRecognizer){
-            let logoutModal = UIAlertController(title: "Logout from Udacity", message: nil, preferredStyle: .ActionSheet)
-        let logoutAction = UIAlertAction(title: "Logout", style: .Destructive){(action: UIAlertAction!) in
-            UdacityClient.sharedInstance().deleteMethodImplementation(){(success, error) in
-                if success{
-                    let logOutController = self.storyboard!.instantiateViewControllerWithIdentifier("LoginViewController")
-                    self.presentViewController(logOutController, animated: false, completion: nil)
-                } else{
-                    let alert = UIAlertController(title: "Bad luck", message: "You weren't logged out", preferredStyle: .Alert)
-                    alert.addAction(UIAlertAction(title: "Dimiss", style: .Default, handler: nil))
-                    self.presentViewController(alert, animated: true, completion: nil)
-                }
-            }
-            
+    /* Helper: alert display function */
+    func alertOnFailure(title: String!, message: String!){
+        dispatch_async(dispatch_get_main_queue()){
+            self.activityView.alpha = 0.0
+            self.activityView.stopAnimating()
+            let controller = UIAlertController(title: title, message: message, preferredStyle: .Alert)
+            controller.addAction(UIAlertAction(title: "Got it", style: .Default, handler: nil))
+            self.presentViewController(controller, animated: true, completion: nil)
         }
-        logoutModal.addAction(logoutAction)
-        
-        let cancelAction = UIAlertAction(title: "Cancel", style: .Default, handler: nil)
-        logoutModal.addAction(cancelAction)
-        
-        self.presentViewController(logoutModal, animated: true, completion: nil)
-        
     }
+
+
 }
+
+
+
+
 

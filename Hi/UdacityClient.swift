@@ -9,7 +9,7 @@
 import Foundation
 
 class UdacityClient: NSObject{
-
+    
     var session: NSURLSession
     
     // Authentication
@@ -50,6 +50,13 @@ class UdacityClient: NSObject{
                 _ = [NSLocalizedDescriptionKey : "Could not parse the JSON: '\(data)'"]
                 completionHandler(success: false, errorString: nil)
             }
+            
+//            if let parsedData = parsedResult as? [String: AnyObject] {
+//                StudentLocations(dictionary: parsedData)
+//            }
+//            if let parsedArray = parsedResult as? [[String: AnyObject]]{
+//                StudentLocations.getLocations(parsedArray)
+//            }
             
             
             if let firstName = parsedResult["user"]!!.valueForKey("first_name") as? String {
@@ -102,8 +109,14 @@ class UdacityClient: NSObject{
                 completionHandler(success: false, errorString: nil)
             }
             
+//            if let parsedData = parsedResult as? [String: AnyObject] {
+//                StudentLocations(dictionary: parsedData)
+//            }
+//            if let parsedArray = parsedResult as? [[String: AnyObject]]{
+//                StudentLocations.getLocations(parsedArray)
+//            }
             
-            if let userKey = parsedResult["account"]!!.valueForKey("key") as? String {
+            if let userKey = parsedResult["account"]??.valueForKey("key") as? String {
                 self.userKey = userKey
                 completionHandler(success: true, errorString: nil)
             } else {
@@ -139,13 +152,12 @@ class UdacityClient: NSObject{
             
             /* GUARD: Did we get a successful 2XX response? */
             guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
-                if let response = response as? NSHTTPURLResponse {
-                    print("Your request returned an invalid response! Status code: \(response.statusCode)!")
-                }else if let response = response {
-                    print("Your request returned an invalid response! Response: \(response)!")
-                    
+                if let _ = response as? NSHTTPURLResponse {
+                    completionHandler(success: false, errorString: error?.localizedDescription)
+                }else if let _ = response {
+                    completionHandler(success: false, errorString: error?.localizedDescription)
                 } else {
-                    print("Your request returned an invalid response!")
+                    completionHandler(success: false, errorString: error?.localizedDescription)
                 }
                 return
             }
@@ -158,9 +170,10 @@ class UdacityClient: NSObject{
             var parsedResult: AnyObject!
             do{
                 parsedResult =  try! NSJSONSerialization.JSONObjectWithData(data.subdataWithRange(NSMakeRange(5, data.length - 5)), options: .AllowFragments) as! [String:AnyObject]
+                completionHandler(success: true, errorString: nil)
             }catch{
                 _ = [NSLocalizedDescriptionKey : "Could not parse the JSON: '\(data)'"]
-                completionHandler(success: false, errorString: nil)
+                completionHandler(success: false, errorString: error as? String)
             }
             
             // Do nothing
@@ -183,6 +196,5 @@ class UdacityClient: NSObject{
         return Singleton.sharedInstance
 
     }
-    
 
 }

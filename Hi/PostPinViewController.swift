@@ -31,6 +31,7 @@ class PostPinViewController: UIViewController, MKMapViewDelegate, CLLocationMana
     var pointAnnotation : MKPointAnnotation!
     var pinPointAnnotation : MKPinAnnotationView!
     var myLocationGrabbed : CLLocationManager!
+    var tapRecognizer: UITapGestureRecognizer? = nil
 
     var student = [StudentLocations]()
     var coordinatesToParse: String!
@@ -40,6 +41,7 @@ class PostPinViewController: UIViewController, MKMapViewDelegate, CLLocationMana
     
 override func viewDidLoad() {
     super.viewDidLoad()
+    self.initTap()
     self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Cancel, target: self, action: "cancel")
     mapView.alpha = 0.0
     activityView.alpha = 0.0
@@ -47,7 +49,17 @@ override func viewDidLoad() {
     mediaURL2Attach.hidden = true
     fullName = "\(UdacityClient.sharedInstance().firstName) \(UdacityClient.sharedInstance().lastName)"
 }
+    
+override func viewWillAppear(animated: Bool) {
+    super.viewWillAppear(animated)
+    self.addKeyboardDismissRecognizer()
+}
 
+override func viewWillDisappear(animated: Bool) {
+    super.viewWillDisappear(animated)
+    self.removeKeyboardDismissRecognizer()
+}
+    
     @IBAction func cancel(){
         self.dismissViewControllerAnimated(true, completion: nil)
     }
@@ -58,27 +70,36 @@ override func viewDidLoad() {
         if  textFieldForLocation.text!.isEmpty{
             self.alertOnFailure("Error", message: "There isn't anything in the textfield to search for")
         } else{
+            self.view.endEditing(true)
             activityView.alpha = 1.0
             activityView.startAnimating()
-            
-            //self.findmeOnMapGeoCoded()
-            
             
             mapSearchRequest = MKLocalSearchRequest()
             mapSearchRequest.naturalLanguageQuery = textFieldForLocation.text
             mapSearch = MKLocalSearch(request: mapSearchRequest!)
             mapSearch.startWithCompletionHandler{(mapSearchResponse, error) -> Void in
-                self.pointAnnotation = MKPointAnnotation()
-                self.latit = mapSearchResponse!.boundingRegion.center.latitude
-                self.longit = mapSearchResponse!.boundingRegion.center.longitude
-                self.pointAnnotation.coordinate = CLLocationCoordinate2D(latitude: mapSearchResponse!.boundingRegion.center.latitude, longitude: mapSearchResponse!.boundingRegion.center.longitude)
-                self.pointAnnotation.title = self.fullName
-                self.pointAnnotation.subtitle = self.mediaURL2Attach.text
-                self.pinPointAnnotation = MKPinAnnotationView(annotation: self.pointAnnotation, reuseIdentifier: nil)
-                self.mapView.centerCoordinate = self.pointAnnotation.coordinate
-                self.mapView.addAnnotation(self.pinPointAnnotation.annotation!)
+                
+                if mapSearchResponse?.boundingRegion.center.latitude == nil{
+                    self.alertOnFailure("Failed", message: "Provide a valid location")
+                    self.textFieldForLocation.text = ""
+                    self.textFieldForLocation.placeholder = "Enter Your Location"
+                }else if mapSearchResponse?.boundingRegion.center.longitude == nil{
+                    self.alertOnFailure("Failed", message: "Provide a valid location")
+                    self.textFieldForLocation.text = ""
+                    self.textFieldForLocation.placeholder = "Enter Your Location"
+                }else{
+                    self.pointAnnotation = MKPointAnnotation()
+                    self.latit = mapSearchResponse!.boundingRegion.center.latitude
+                    self.longit = mapSearchResponse!.boundingRegion.center.longitude
+                    self.pointAnnotation.coordinate = CLLocationCoordinate2D(latitude: self.latit, longitude: self.longit)
+                    self.pointAnnotation.title = self.fullName
+                    self.pointAnnotation.subtitle = self.mediaURL2Attach.text
+                    self.pinPointAnnotation = MKPinAnnotationView(annotation: self.pointAnnotation, reuseIdentifier: nil)
+                    self.mapView.centerCoordinate = self.pointAnnotation.coordinate
+                    self.mapView.addAnnotation(self.pinPointAnnotation.annotation!)
+                    self.presentSecondView()
+                }
             }
-            self.presentSecondView()
         }
     }
     
@@ -110,56 +131,30 @@ override func viewDidLoad() {
 //        self.presentSecondView()
     }
     
-
     
-    
-    
-    
+    // MARK: Function to post pin and send data to Parse
     @IBAction func postMyPin(sender: AnyObject) {
         if self.mediaURL2AttachValidation(mediaURL2Attach.text!){
-            ParseClient.sharedInstance().postDataToParse(latit.description, longitude: longit.description, mapString: textFieldForLocation.text!, mediaURL: mediaURL2Attach.text!){(success, error) in
-                if success{
-                    dispatch_async(dispatch_get_main_queue()){
-                        self.dismissViewControllerAnimated(true, completion: nil)
+            if hasConnectivity() {
+                ParseClient.sharedInstance().postDataToParse(latit.description, longitude: longit.description, mapString: textFieldForLocation.text!, mediaURL: mediaURL2Attach.text!){(success, error) in
+                    if success{
+                        dispatch_async(dispatch_get_main_queue()){
+                            self.dismissViewControllerAnimated(true, completion: nil)
+                        }
+                    }else{
+                        self.alertOnFailure("Failed to post", message: "We encountered an error and failed to post data to the server")
                     }
-                }else{
-                    self.alertOnFailure("Failed to post", message: "We encountered an error and failed to post data to the server")
                 }
+            }else{
+                self.alertOnFailure("Sorry", message: "There is no available connection right now, try again :)")
             }
         } else {
             self.alertOnFailure("Bad URL", message: "The url you typed isn't a good url, please type another one")
         }
+
     }
     
-    // MARK: find me on the map
-//    func findmeOnMap(latitude: CLLocationDegrees, longitude: CLLocationDegrees){
-//        self.pointAnnotation = MKPointAnnotation()
-//        self.pointAnnotation.coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-//        self.pointAnnotation.title = fullName
-//        if mediaURL2AttachValidation(mediaURL2Attach.text!){
-//            self.pointAnnotation.subtitle = mediaURL2Attach.text
-//        }
-//        self.pinPointAnnotation = MKPinAnnotationView(annotation: self.pointAnnotation, reuseIdentifier: nil)
-//        self.mapView.centerCoordinate = self.pointAnnotation.coordinate
-//        self.mapView.addAnnotation(self.pinPointAnnotation.annotation!)
-//    }
-    
-    func findmeOnMapGeoCoded(){
-        let gCoder = CLGeocoder()
-        
-        gCoder.geocodeAddressString(textFieldForLocation.text!){(placemark, error) in
-            
-            if let placemark = placemark![0] as? CLPlacemark {
-                let placemark: CLPlacemark = placemark
-                let coordinates: CLLocationCoordinate2D = placemark.location!.coordinate
-                let pointAnnotation: MKPointAnnotation = MKPointAnnotation()
-                pointAnnotation.coordinate = coordinates
-                pointAnnotation.title = self.fullName
-                self.mapView?.centerCoordinate = coordinates
-                self.mapView.addAnnotation(pointAnnotation)
-            }
-        }
-    }
+
     /* Helper: transition within the same view*/
     func presentSecondView(){
         firstLabel.hidden = true
@@ -193,7 +188,7 @@ override func viewDidLoad() {
         textField.hidden = false
     }
     
-    /* Helper */
+    /* Helper: Abstraction for alerts */
     func alertOnFailure(title: String!, message: String!){
         dispatch_async(dispatch_get_main_queue()){
             let controller = UIAlertController(title: title, message: message, preferredStyle: .Alert)
@@ -201,4 +196,40 @@ override func viewDidLoad() {
             self.presentViewController(controller, animated: true, completion: nil)
         }
     }
+    
+    /* Helper: check for connectivity */
+    func hasConnectivity() -> Bool{
+        let reachable: Reachability = Reachability.reachabilityForInternetConnection()
+        let networkStatus: Int = reachable.currentReachabilityStatus().rawValue
+        if networkStatus != 0{
+            return true
+        } else {
+            return false
+        }
+    }
+}
+
+// MARK: Tap function
+
+extension PostPinViewController {
+    func initTap(){
+        /* Configure tap recognizer */
+        tapRecognizer = UITapGestureRecognizer(target: self, action: "handleSingleTap:")
+        tapRecognizer?.numberOfTapsRequired = 1
+    }
+}
+
+extension PostPinViewController {
+    func addKeyboardDismissRecognizer() {
+        self.view.addGestureRecognizer(tapRecognizer!)
+    }
+    
+    func removeKeyboardDismissRecognizer() {
+        self.view.removeGestureRecognizer(tapRecognizer!)
+    }
+    
+    func handleSingleTap(recognizer: UITapGestureRecognizer) {
+        self.view.endEditing(true)
+    }
+    
 }

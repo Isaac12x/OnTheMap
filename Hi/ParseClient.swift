@@ -24,17 +24,19 @@ class ParseClient: NSObject {
     func callParseAPI(completionHandler: (success: Bool, errorString: ErrorType?) -> Void){
         
         /* 1. Set the parameters */
-        
+        let params = [
+            "order": "-UpdatedAt"
+        ]
         //*& 2. Build the URL */
-        let urlString = "https://api.parse.com/1/classes/StudentLocation"
+        let urlString = URL.secureParseURL + ParseClient.sharedInstance().escapedParams(params)
         let url = NSURL(string: urlString)!
         
         /* 3. Configure the request */
         let request = NSMutableURLRequest(URL: url)
         
         /* Add  App Id and REST API Id */
-        request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
-        request.addValue("QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY", forHTTPHeaderField: "X-Parse-REST-API-Key")
+        request.addValue("\(HeaderValues.ApiKey)", forHTTPHeaderField: "X-Parse-Application-Id")
+        request.addValue("\(HeaderValues.APiKeyParse)", forHTTPHeaderField: "X-Parse-REST-API-Key")
         let task = session.dataTaskWithRequest(request) { data, response, error in
             
             guard (error == nil) else {
@@ -44,12 +46,12 @@ class ParseClient: NSObject {
             
             /* GUARD: Did we get a successful 2XX response? */
             guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
-                if let response = response as? NSHTTPURLResponse {
-                    print("Your request returned an invalid response! Status code: \(response.statusCode)!")
-                } else if let response = response {
-                    print("Your request returned an invalid response! Response: \(response)!")
+                if let _ = response as? NSHTTPURLResponse {
+                    completionHandler(success: false, errorString: error)
+                } else if let _ = response {
+                    completionHandler(success: false, errorString: error)
                 } else {
-                    print("Your request returned an invalid response!")
+                    completionHandler(success: false, errorString: error)
                 }
                 return
             }
@@ -67,13 +69,16 @@ class ParseClient: NSObject {
                 completionHandler(success: false, errorString: error)
             }
             
+//            if let parsedData = parsedResult as? [String: AnyObject] {
+//                StudentLocations(dictionary: parsedData)
+//            }
+//            if let parsedArray = parsedResult as? [[String: AnyObject]]{
+//                StudentLocations.getLocations(parsedArray)
+//            }
 
-            
             if let results = parsedResult["results"] as? [[String : AnyObject]] {
-                //Clear existing data from the mapPoints object.
                 self.map.removeAll(keepCapacity: true)
-                //StudentLocations.getLocations(results)
-                //Re-populate the mapPoints object with refreshed data.
+
                 for result in results {
                     self.map.append(StudentLocations(dictionary: result))
                 }
@@ -93,8 +98,8 @@ class ParseClient: NSObject {
         let url = NSURL(string: urlString)!
         let request = NSMutableURLRequest(URL: url)
         request.HTTPMethod = "POST"
-        request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
-        request.addValue("QuWThTdiRmTux3YaDseUSEpUKo7aBYM737yKd4gY", forHTTPHeaderField: "X-Parse-REST-API-Key")
+        request.addValue("\(HeaderValues.ApiKey)", forHTTPHeaderField: "X-Parse-Application-Id")
+        request.addValue("\(HeaderValues.APiKeyParse)", forHTTPHeaderField: "X-Parse-REST-API-Key")
         request.addValue("aplication/json", forHTTPHeaderField: "Content-Type")
         
         request.HTTPBody = "{\"uniqueKey\": \"\(UdacityClient.sharedInstance().userKey)\", \"firstName\": \"\(UdacityClient.sharedInstance().firstName)\", \"lastName\": \"\(UdacityClient.sharedInstance().lastName)\",\"mapString\": \"\(mapString)\", \"mediaURL\": \"\(mediaURL)\",\"latitude\": \(latitude), \"longitude\": \(longitude)}".dataUsingEncoding(NSUTF8StringEncoding)
@@ -116,6 +121,9 @@ class ParseClient: NSObject {
                 return
             }
             
+//            StudentLocations.getLocations(parsedResult as! [[String : AnyObject]])
+
+            
             if let object = parsedResult["objectId"] as? String {
                 self.objectID = object
                 completionHandler(success: true, errorString: nil)
@@ -127,6 +135,17 @@ class ParseClient: NSObject {
         task.resume()
     }
     
+    /* Helper: Input a dictionary and return a url */
+    func escapedParams(parameters: [String: AnyObject]) -> String{
+        var urlVars = [String]()
+        for (mogly, balu) in parameters{
+            let stringBalu = "\(balu)"
+            let escapedBalu = stringBalu.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())
+            urlVars += [mogly + "=" + "\(escapedBalu!)"]
+        }
+        return (!urlVars.isEmpty ? "?" : "") + urlVars.joinWithSeparator("&")
+    }
+
     
     // MARK: Shared instance
     

@@ -24,21 +24,9 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     var parseClient = ParseClient.sharedInstance()
     var session: NSURLSession!
     var tapRecognizer: UITapGestureRecognizer? = nil
-    
-    // MARK: Load textfield image
+    var keyboardAdjusted = false
+    var lastKeyboardOffset : CGFloat = 0.0
 
-    var mail : UIImageView{
-        let image = UIImageView(image: UIImage(named:"email.png"))
-        image.frame = CGRect(x: 0, y: 0, width: 25, height: 25)
-        return image
-    }
-    
-    var password : UIImageView {
-        let image = UIImageView(image: UIImage(named:"password.png"))
-        image.frame = CGRect(x: 0, y: 0, width: 28, height: 28)
-        return image
-    }
-    
 
 //MARK: UIViewController lifecycle
 
@@ -47,21 +35,13 @@ override func viewDidLoad() {
     
     session = NSURLSession.sharedSession()
     self.initTap()
-    
-    userNameTextField.leftView = mail
-    settingStyling(userNameTextField)
-    userNameTextField.placeholder = "Your email here"
-    
-    passwordTextField.leftView = password
-    settingStyling(passwordTextField)
-    passwordTextField.placeholder = "Your password here"
-    
-    self.renableUI()
+    self.setUI()
 }
 
 override func viewWillAppear(animated: Bool) {
     super.viewWillAppear(animated)
     self.addKeyboardDismissRecognizer()
+    self.subscribeToKeyboardNotifications()
 }
 
 override func viewDidAppear(animated: Bool) {
@@ -74,7 +54,7 @@ override func viewDidAppear(animated: Bool) {
 override func viewWillDisappear(animated: Bool) {
     super.viewWillDisappear(animated)
     self.removeKeyboardDismissRecognizer()
-    self.renableUI()
+    self.unsubscribeFromKeyboardNotifications()
 }
 
 
@@ -112,27 +92,35 @@ override func viewWillDisappear(animated: Bool) {
                 debugLabel.text = ""
                 activityIndicatorView.alpha = 1.0
                 activityIndicatorView.startAnimating()
-                UdacityClient.sharedInstance().loginToUdacity(userNameTextField.text!, password: passwordTextField.text!){ (success, error) in
-                    if success {
-                        UdacityClient.sharedInstance().getNameForUdacitystudent(){(success, error) in
-                            if success{
-                                ParseClient.sharedInstance().callParseAPI(){(success,error) in
-                                    if success{
-                                        self.completeLogin()
-                                    } else{
-                                        self.alertOnFailure("Failed", message: "Failed to fetch data")
+                
+                if hasConnectivity() {
+                    UdacityClient.sharedInstance().loginToUdacity(userNameTextField.text!, password: passwordTextField.text!){ (success, error) in
+                        if success {
+                            UdacityClient.sharedInstance().getNameForUdacitystudent(){(success, error) in
+                                if success{
+                                    ParseClient.sharedInstance().callParseAPI(){(success,error) in
+                                        if success{
+                                            self.completeLogin()
+                                        } else{
+                                            self.alertOnFailure("Failed", message: "Failed to fetch data")
+                                        }
                                     }
+                                }else{
+                                    self.alertOnFailure("Failed", message: "Failed on get userKey")
                                 }
-                            }else{
-                                self.alertOnFailure("Failed", message: "Failed on get userKey")
+                            }
+                        }else{
+                            self.alertOnFailure("Failed", message: "Wrong username/password combination")
+                            self.displayError(error)
+                            dispatch_async(dispatch_get_main_queue()){
+                                self.renableUI()
                             }
                         }
-                    }else{
-                        self.alertOnFailure("Failed", message: "Wrong username/password combination")
-                        self.displayError(error)
-                        self.renableUI()
                     }
+                }else{
+                    self.alertOnFailure("Failed", message: "There is no available connection")
                 }
+                
             }
         }
     
@@ -160,7 +148,10 @@ override func viewWillDisappear(animated: Bool) {
             }
         }
 
-    /* Helper */
+
+
+
+    /* Helper: alert display function */
     func alertOnFailure(title: String!, message: String!){
         dispatch_async(dispatch_get_main_queue()){
             self.activityIndicatorView.alpha = 0.0
@@ -171,8 +162,7 @@ override func viewWillDisappear(animated: Bool) {
         }
     }
     
-    // MARK: Disable UI
-    
+    /* HELPER: Disable UI*/
     func setUIDisabled(){
         userNameTextField.alpha  = 0.2
         userNameTextField.userInteractionEnabled = false
@@ -186,6 +176,7 @@ override func viewWillDisappear(animated: Bool) {
         activityIndicatorView.startAnimating()
     }
     
+    /*HELPER: renable the UI*/
     func renableUI(){
         activityIndicatorView.stopAnimating()
         activityIndicatorView.hidden = true
@@ -197,7 +188,41 @@ override func viewWillDisappear(animated: Bool) {
         passwordTextField.alpha = 1
         passwordTextField.text = ""
     }
+    
+    /*HELPER: set the UI*/
+    func setUI(){
+        self.udacityLogin.image = UIImage(named: "udacity")
+        
+        var mail : UIImageView{
+            let image = UIImageView(image: UIImage(named:"email.png"))
+            image.frame = CGRect(x: 0, y: 0, width: 25, height: 25)
+            return image
+        }
+        
+        var password : UIImageView {
+            let image = UIImageView(image: UIImage(named:"password.png"))
+            image.frame = CGRect(x: 0, y: 0, width: 28, height: 28)
+            return image
+        }
+        userNameTextField.leftView = mail
+        settingStyling(userNameTextField)
+        userNameTextField.placeholder = "Your email here"
+        
+        passwordTextField.leftView = password
+        settingStyling(passwordTextField)
+        passwordTextField.placeholder = "Your password here"
+    }
 
+    /* Helper: check for connectivity */
+    func hasConnectivity() -> Bool{
+        let reachable: Reachability = Reachability.reachabilityForInternetConnection()
+        let networkStatus: Int = reachable.currentReachabilityStatus().rawValue
+        if networkStatus != 0{
+            return true
+        } else {
+            return false
+        }
+    }
 }
 
 // MARK: Tap function
@@ -211,6 +236,7 @@ extension LoginViewController {
 }
 
 extension LoginViewController {
+
     func addKeyboardDismissRecognizer() {
         self.view.addGestureRecognizer(tapRecognizer!)
     }
@@ -222,7 +248,41 @@ extension LoginViewController {
     func handleSingleTap(recognizer: UITapGestureRecognizer) {
         self.view.endEditing(true)
     }
+    
+    func subscribeToKeyboardNotifications() {
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillShow:", name: UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillHide:", name: UIKeyboardWillHideNotification, object: nil)
+    }
+    
+    func unsubscribeFromKeyboardNotifications() {
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillShowNotification, object: nil)
+    }
+    
+    func keyboardWillShow(notification: NSNotification) {
+        
+        if keyboardAdjusted == false {
+            lastKeyboardOffset = getKeyboardHeight(notification) / 2
+            self.view.superview?.frame.origin.y -= lastKeyboardOffset
+            keyboardAdjusted = true
+        }
+    }
+    
+    func keyboardWillHide(notification: NSNotification) {
+        
+        if keyboardAdjusted == true {
+            self.view.superview?.frame.origin.y += lastKeyboardOffset
+            keyboardAdjusted = false
+        }
+    }
+    
+    func getKeyboardHeight(notification: NSNotification) -> CGFloat {
+        let userInfo = notification.userInfo
+        let keyboardSize = userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue // of CGRect
+        return keyboardSize.CGRectValue().height
+}
 
 }
+
+
 
 

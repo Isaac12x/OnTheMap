@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EC0225161C3332FE002A66EC /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = EC0225151C3332FE002A66EC /* Reachability.m */; };
 		EC902A941C298648008077CD /* TextFieldClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC902A931C298648008077CD /* TextFieldClass.swift */; };
 		EC902A9C1C2ABC52008077CD /* UdacityConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC902A9B1C2ABC52008077CD /* UdacityConstants.swift */; };
 		EC902A9E1C2B3850008077CD /* StudentLocations.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC902A9D1C2B3850008077CD /* StudentLocations.swift */; };
@@ -16,9 +17,7 @@
 		EC902AB41C2EBF9C008077CD /* map.pdf in Resources */ = {isa = PBXBuildFile; fileRef = EC902AB01C2EBF9C008077CD /* map.pdf */; };
 		EC902AB51C2EBF9C008077CD /* pin.pdf in Resources */ = {isa = PBXBuildFile; fileRef = EC902AB11C2EBF9C008077CD /* pin.pdf */; };
 		EC902AB61C2EBF9C008077CD /* udacity.pdf in Resources */ = {isa = PBXBuildFile; fileRef = EC902AB21C2EBF9C008077CD /* udacity.pdf */; };
-		EC902AB81C2EC575008077CD /* UdacityConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC902AB71C2EC575008077CD /* UdacityConvenience.swift */; };
 		EC902ABA1C2F07E8008077CD /* ParseConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC902AB91C2F07E8008077CD /* ParseConstants.swift */; };
-		EC902ABC1C2F07F0008077CD /* ParseConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC902ABB1C2F07F0008077CD /* ParseConvenience.swift */; };
 		EC902ABE1C2F07FA008077CD /* ParseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC902ABD1C2F07FA008077CD /* ParseClient.swift */; };
 		EC902AC21C2F24CC008077CD /* PostPinViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC902AC11C2F24CC008077CD /* PostPinViewController.swift */; };
 		ECF0BA231C20462600A2675F /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECF0BA221C20462600A2675F /* MapViewController.swift */; };
@@ -49,6 +48,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		EC0225131C3332FD002A66EC /* OnTheMap-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OnTheMap-Bridging-Header.h"; sourceTree = "<group>"; };
+		EC0225141C3332FE002A66EC /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
+		EC0225151C3332FE002A66EC /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		EC902A931C298648008077CD /* TextFieldClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TextFieldClass.swift; path = ../TextFieldClass.swift; sourceTree = "<group>"; };
 		EC902A981C299D1F008077CD /* Roboto-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Medium.ttf"; sourceTree = "<group>"; };
 		EC902A991C299D1F008077CD /* Roboto-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Regular.ttf"; sourceTree = "<group>"; };
@@ -61,9 +63,7 @@
 		EC902AB01C2EBF9C008077CD /* map.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = map.pdf; sourceTree = "<group>"; };
 		EC902AB11C2EBF9C008077CD /* pin.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = pin.pdf; sourceTree = "<group>"; };
 		EC902AB21C2EBF9C008077CD /* udacity.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = udacity.pdf; sourceTree = "<group>"; };
-		EC902AB71C2EC575008077CD /* UdacityConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UdacityConvenience.swift; sourceTree = "<group>"; };
 		EC902AB91C2F07E8008077CD /* ParseConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParseConstants.swift; sourceTree = "<group>"; };
-		EC902ABB1C2F07F0008077CD /* ParseConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParseConvenience.swift; sourceTree = "<group>"; };
 		EC902ABD1C2F07FA008077CD /* ParseClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParseClient.swift; sourceTree = "<group>"; };
 		EC902AC11C2F24CC008077CD /* PostPinViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostPinViewController.swift; sourceTree = "<group>"; };
 		ECF0BA221C20462600A2675F /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
@@ -159,6 +159,8 @@
 		EC902AAD1C2EBF52008077CD /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				EC0225141C3332FE002A66EC /* Reachability.h */,
+				EC0225151C3332FE002A66EC /* Reachability.m */,
 				ECFD24231C1B5BD1005624BE /* Info.plist */,
 			);
 			name = "Supporting Files";
@@ -179,7 +181,6 @@
 			isa = PBXGroup;
 			children = (
 				EC902A9B1C2ABC52008077CD /* UdacityConstants.swift */,
-				EC902AB71C2EC575008077CD /* UdacityConvenience.swift */,
 				EC902AA51C2EBAFE008077CD /* UdacityClient.swift */,
 			);
 			name = Udacity;
@@ -189,7 +190,6 @@
 			isa = PBXGroup;
 			children = (
 				EC902AB91C2F07E8008077CD /* ParseConstants.swift */,
-				EC902ABB1C2F07F0008077CD /* ParseConvenience.swift */,
 				EC902ABD1C2F07FA008077CD /* ParseClient.swift */,
 			);
 			name = Parse;
@@ -226,6 +226,7 @@
 			isa = PBXGroup;
 			children = (
 				ECFD24171C1B5BD1005624BE /* AppDelegate.swift */,
+				EC0225131C3332FD002A66EC /* OnTheMap-Bridging-Header.h */,
 				EC902AA81C2EBF0D008077CD /* Model */,
 				EC902AA91C2EBF13008077CD /* View */,
 				EC902AAA1C2EBF1C008077CD /* Controller */,
@@ -301,7 +302,7 @@
 		ECFD240C1C1B5BD0005624BE /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0710;
+				LastSwiftUpdateCheck = 0720;
 				LastUpgradeCheck = 0710;
 				ORGANIZATIONNAME = "Isaac Albets Ramonet";
 				TargetAttributes = {
@@ -382,13 +383,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EC0225161C3332FE002A66EC /* Reachability.m in Sources */,
 				EC902AA61C2EBAFE008077CD /* UdacityClient.swift in Sources */,
-				EC902ABC1C2F07F0008077CD /* ParseConvenience.swift in Sources */,
 				EC902AC21C2F24CC008077CD /* PostPinViewController.swift in Sources */,
 				ECF0BA271C233D9700A2675F /* TableViewCell.swift in Sources */,
 				EC902ABA1C2F07E8008077CD /* ParseConstants.swift in Sources */,
 				ECF0BA231C20462600A2675F /* MapViewController.swift in Sources */,
-				EC902AB81C2EC575008077CD /* UdacityConvenience.swift in Sources */,
 				EC902A9E1C2B3850008077CD /* StudentLocations.swift in Sources */,
 				ECFD241A1C1B5BD1005624BE /* LoginViewController.swift in Sources */,
 				EC902A941C298648008077CD /* TextFieldClass.swift in Sources */,
@@ -535,10 +535,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = Hi/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.udacity.Hi;
 				PRODUCT_NAME = OnTheMap.temp_caseinsensitive_rename;
+				SWIFT_OBJC_BRIDGING_HEADER = "Hi/OnTheMap-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
@@ -546,10 +549,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = Hi/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.udacity.Hi;
 				PRODUCT_NAME = OnTheMap.temp_caseinsensitive_rename;
+				SWIFT_OBJC_BRIDGING_HEADER = "Hi/OnTheMap-Bridging-Header.h";
 			};
 			name = Release;
 		};
