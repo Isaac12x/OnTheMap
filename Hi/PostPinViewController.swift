@@ -73,7 +73,7 @@ override func viewWillDisappear(animated: Bool) {
             self.view.endEditing(true)
             activityView.alpha = 1.0
             activityView.startAnimating()
-            
+            activityView.alpha = 0.8
             if let ham = Students.sharedInstance().student["firstName"]{
                 if let jam = Students.sharedInstance().student["lastName"]{
                     fullName = "\(ham) \(jam)"
@@ -106,6 +106,7 @@ override func viewWillDisappear(animated: Bool) {
                     self.presentSecondView()
                 }
             }
+            activityView.alpha = 1.0
         }
     }
     
