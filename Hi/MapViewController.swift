@@ -18,7 +18,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         @IBOutlet weak var logOutButton: UIBarButtonItem!
     
     var session: NSURLSession!
-    var locations = Students.sharedInstance().studentLocations
     
 override func viewDidLoad(){
     super.viewDidLoad()
@@ -28,18 +27,12 @@ override func viewDidLoad(){
     self.activityView.alpha = 0.0
     
     //MARK: Set up the Map
+    self.createPinsToMap()
     
-    for dictionary in locations{
-        let pinPoint = MKPointAnnotation()
-        let location = CLLocationCoordinate2D(latitude: dictionary.latitude, longitude: dictionary.longitude)
-        pinPoint.coordinate = location
-        pinPoint.title = "\(dictionary.fullName)"
-        pinPoint.subtitle = dictionary.mediaURL
-        mapView.addAnnotation(pinPoint)
-    }
-
 }
-    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+    }
     
     // MARK: MapViewDelegate
     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
@@ -89,17 +82,27 @@ override func viewDidLoad(){
         }
     }
 
+    // MARK: Add pins to the map
+    func createPinsToMap(){
+    for dictionary in Students.sharedInstance().studentLocations{
+        let pinPoint = MKPointAnnotation()
+        let location = CLLocationCoordinate2D(latitude: dictionary.latitude, longitude: dictionary.longitude)
+        pinPoint.coordinate = location
+        pinPoint.title = "\(dictionary.fullName)"
+        pinPoint.subtitle = dictionary.mediaURL
+        mapView.addAnnotation(pinPoint)
+        }
+    }
     
     
     /* Helper: refresh data */
     func refreshDataFromParse(){
         activityView.alpha = 1.0
         activityView.startAnimating()
-        
-        let parseClient = ParseClient.sharedInstance()
-        parseClient.callParseAPI(){ (success, error) in
+    
+        ParseClient.sharedInstance().callParseAPI(){ (success, error) in
             if success{
-                //Do nothing
+                self.createPinsToMap()
             }else{
                 let alert = UIAlertController(title: "Failed", message: "Failed to reload data", preferredStyle: .Alert)
                 alert.addAction(UIAlertAction(title: "Dismiss", style: .Default, handler: nil))

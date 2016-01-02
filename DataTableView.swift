@@ -11,14 +11,11 @@ import Foundation
 
 class DataTableView: UITableViewController{
     
-        @IBOutlet weak var tableDisplay: UITableView!
+        @IBOutlet var tableDisplay: UITableView!
         @IBOutlet weak var cancelButton: UIBarButtonItem!
         @IBOutlet weak var postPinToMapButton: UIBarButtonItem!
         @IBOutlet weak var logOutButton: UIBarButtonItem!
         @IBOutlet weak var activityView: UIActivityIndicatorView!
-    
-    var appDelegate: AppDelegate!
-    var locations = Students.sharedInstance().studentLocations
     
 override func viewDidLoad() {
     super.viewDidLoad()
@@ -26,7 +23,7 @@ override func viewDidLoad() {
 
 override func viewWillAppear(animated: Bool) {
     super.viewWillAppear(animated)
-    self.tableDisplay!.reloadData()
+    self.tableView!.reloadData()
 }
     // MARK: Post a new Pin
     @IBAction func postNewPin(sender: AnyObject){
@@ -57,18 +54,17 @@ override func viewWillAppear(animated: Bool) {
     func refreshDataFromParse(){
         activityView.alpha = 1.0
         activityView.startAnimating()
-        
-        let parseClient = ParseClient.sharedInstance()
-        parseClient.callParseAPI(){ (success, error) in
-            if success{
-                //Do nothing
-            }else{
-                let alert = UIAlertController(title: "Failed", message: "Failed to reload data", preferredStyle: .Alert)
-                alert.addAction(UIAlertAction(title: "Dismiss", style: .Default, handler: nil))
-                self.presentViewController(alert, animated: true, completion: nil)
+
+            ParseClient.sharedInstance().callParseAPI(){ (success, error) in
+                if success{
+                    self.tableView.reloadData()
+                }else{
+                    let alert = UIAlertController(title: "Failed", message: "Failed to reload data", preferredStyle: .Alert)
+                    alert.addAction(UIAlertAction(title: "Dismiss", style: .Default, handler: nil))
+                    self.presentViewController(alert, animated: true, completion: nil)
+                }
             }
-        }
-        
+
         activityView.stopAnimating()
         activityView.alpha = 0.0
     }
@@ -86,12 +82,12 @@ override func viewWillAppear(animated: Bool) {
     
     // Table cell's count
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int{
-        return locations.count
+        return Students.sharedInstance().studentLocations.count
     }
     
     // Populate tableView cells with data form the data storage
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let location = locations[indexPath.row]
+        let location = Students.sharedInstance().studentLocations[indexPath.row]
         
         let cellIdentifier = "PeopleInMap"
         
@@ -105,7 +101,7 @@ override func viewWillAppear(animated: Bool) {
     // Instructions to segue when pressing down into any cell
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         let app = UIApplication.sharedApplication()
-        let location = locations[indexPath.row]
+        let location = Students.sharedInstance().studentLocations[indexPath.row]
 
         if location.mediaURL.isEmpty == false{
             app.openURL(NSURL(string: location.mediaURL)!)

@@ -28,7 +28,7 @@ class ParseClient: NSObject {
         /* 1. Set the parameters */
         let params = [
             "limit": 400,
-            "order": "-UpdatedAt"
+            "order": "-updatedAt"
         ]
         //*& 2. Build the URL */
         let urlString = URL.secureParseURL + ParseClient.sharedInstance().escapedParams(params)
@@ -74,7 +74,7 @@ class ParseClient: NSObject {
 
 
             if let results = parsedResult["results"] as? [[String: AnyObject]] {
-                //Students.sharedInstance().studentLocations.removeAll(keepCapacity: true)
+                Students.sharedInstance().studentLocations.removeAll(keepCapacity: true)
                 
 
                 for result in results {
@@ -120,9 +120,7 @@ class ParseClient: NSObject {
             }catch{
                 parsedResult = nil
                 return
-            }
-            print(parsedResult)
-            
+            }            
             if let object = parsedResult["objectId"] as? [String:AnyObject] {
                 Students.sharedInstance().studentLocations.append(StudentLocations(dictionary: object))
 

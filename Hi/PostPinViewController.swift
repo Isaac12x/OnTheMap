@@ -33,17 +33,17 @@ class PostPinViewController: UIViewController, MKMapViewDelegate, CLLocationMana
     var myLocationGrabbed : CLLocationManager!
     var tapRecognizer: UITapGestureRecognizer? = nil
 
-    var student = [StudentLocations]()
     var coordinatesToParse: String!
     var latit: CLLocationDegrees!
     var longit: CLLocationDegrees!
-    
     var fullName: String!
+    var appDelegate: AppDelegate!
     
 override func viewDidLoad() {
     super.viewDidLoad()
     self.initTap()
     self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Cancel, target: self, action: "cancel")
+    appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     mapView.alpha = 0.0
     activityView.alpha = 0.0
     postMyPinButton.alpha = 0.0
@@ -148,8 +148,12 @@ override func viewWillDisappear(animated: Bool) {
                         dispatch_async(dispatch_get_main_queue()){
                             self.dismissViewControllerAnimated(true, completion: nil)
                         }
+                    }else if success == false && error == nil{
+                        dispatch_async(dispatch_get_main_queue()){
+                            self.dismissViewControllerAnimated(true, completion: nil)
+                        }
                     }else{
-                        self.alertOnFailure("Failed to post", message: "We encountered an error and failed to post data to the server")
+                        self.alertOnFailure("Failed to post", message: "We encountered an error and failed to post data to the server \(error) \(success)")
                     }
                 }
             }else{
